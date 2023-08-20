@@ -17,7 +17,7 @@ class LengthMap {
 class Mention {
   Mention({
     required this.trigger,
-    this.data = const [],
+    required this.data,
     this.style,
     this.matchAll = false,
     this.suggestionBuilder,
@@ -33,7 +33,7 @@ class Mention {
   /// You need to provide two properties `id` & `display` both are [String]
   /// You can also have any custom properties as you like to build custom suggestion
   /// widget.
-  final List<Map<String, dynamic>> data;
+  final ValueNotifier<List<Map<String, dynamic>>> data;
 
   /// Style for the mention item in Input.
   final TextStyle? style;

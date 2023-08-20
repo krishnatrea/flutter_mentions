@@ -268,7 +268,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
         );
       }
 
-      element.data.forEach(
+      element.data.value.forEach(
         (e) => data["${element.trigger}${e['display']}"] = e['style'] != null
             ? Annotation(
                 style: e['style'],
@@ -343,6 +343,11 @@ class FlutterMentionsState extends State<FlutterMentions> {
       });
 
       showSuggestions.value = val != -1;
+
+      if(showSuggestions.value == true) {
+        
+
+      }
 
       if (widget.onSuggestionVisibleChanged != null) {
         widget.onSuggestionVisibleChanged!(val != -1);
@@ -427,7 +432,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
                     suggestionListHeight: widget.suggestionListHeight,
                     suggestionBuilder: list.suggestionBuilder,
                     suggestionListDecoration: widget.suggestionListDecoration,
-                    data: list.data.where((element) {
+                    data: list.data.value.where((element) {
                       final ele = element['display'].toLowerCase();
                       final str = _selectedMention!.str
                           .toLowerCase()
