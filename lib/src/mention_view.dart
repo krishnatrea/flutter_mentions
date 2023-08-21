@@ -260,6 +260,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
       if (element.matchAll) {
         data['${element.trigger}([A-Za-z0-9])*'] = Annotation(
           style: element.style,
+           theme: null,
           id: null,
           display: null,
           trigger: element.trigger,
@@ -272,6 +273,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
         (e) => data["${element.trigger}${e['display']}"] = e['style'] != null
             ? Annotation(
                 style: e['style'],
+                theme: e['theme'],
                 id: e['id'],
                 display: e['display'],
                 trigger: element.trigger,
@@ -280,6 +282,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
               )
             : Annotation(
                 style: element.style,
+                 theme: e['theme'],
                 id: e['id'],
                 display: e['display'],
                 trigger: element.trigger,
@@ -344,10 +347,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
 
       showSuggestions.value = val != -1;
 
-      if(showSuggestions.value == true) {
-        
-
-      }
+      if (showSuggestions.value == true) {}
 
       if (widget.onSuggestionVisibleChanged != null) {
         widget.onSuggestionVisibleChanged!(val != -1);

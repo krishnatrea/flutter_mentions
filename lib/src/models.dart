@@ -60,9 +60,11 @@ class Annotation {
     this.display,
     this.disableMarkup = false,
     this.markupBuilder,
+    required this.theme
   });
 
   TextStyle? style;
+  String? theme;
   String? id;
   String? display;
   String trigger;

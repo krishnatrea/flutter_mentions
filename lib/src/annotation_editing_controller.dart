@@ -6,8 +6,6 @@ class AnnotationEditingController extends TextEditingController {
   Map<String, Annotation> _mapping;
   String? _pattern;
 
-
-
   // Generate the Regex pattern for matching all the suggestions in one.
   AnnotationEditingController(this._mapping)
       : _pattern = _mapping.keys.isNotEmpty
@@ -33,7 +31,7 @@ class AnnotationEditingController extends TextEditingController {
                 return mention.markupBuilder != null
                     ? mention.markupBuilder!(
                         mention.trigger, mention.id!, mention.display!)
-                    : '${mention.trigger}[__${mention.id}__](__${mention.display}__)';
+                    : '${mention.trigger}${mention.display}_${mention.id}_${mention.theme}';
               } else {
                 return match[0]!;
               }
@@ -57,7 +55,8 @@ class AnnotationEditingController extends TextEditingController {
   }
 
   @override
-  TextSpan buildTextSpan({BuildContext? context, TextStyle? style, bool? withComposing}) {
+  TextSpan buildTextSpan(
+      {BuildContext? context, TextStyle? style, bool? withComposing}) {
     var children = <InlineSpan>[];
 
     if (_pattern == null || _pattern == '()') {
@@ -70,7 +69,6 @@ class AnnotationEditingController extends TextEditingController {
             final mention = _mapping[match[0]!] ??
                 _mapping[_mapping.keys.firstWhere((element) {
                   final reg = RegExp(element);
-
                   return reg.hasMatch(match[0]!);
                 })]!;
 
