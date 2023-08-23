@@ -9,23 +9,20 @@ class AnnotationEditingController extends TextEditingController {
   // Generate the Regex pattern for matching all the suggestions in one.
   AnnotationEditingController(this._mapping)
       : _pattern = _mapping.keys.isNotEmpty
-            ? "(${_mapping.keys.map((key) => RegExp.escape(key)).join('|')})"
+            ? "(${_mapping.keys.toList().reversed.map((key) => RegExp.escape(key)).join('|')})"
             : null;
 
   /// Can be used to get the markup from the controller directly.
   String get markupText {
-    print("Mapping: $_mapping");
     final someVal = _mapping.isEmpty
         ? text
         : text.splitMapJoin(
             RegExp('$_pattern'),
             onMatch: (Match match) {
-              final mention = _mapping[match[0]!] ??
-                  _mapping[_mapping.keys.firstWhere((element) {
-                    final reg = RegExp(element);
-
-                    return reg.hasMatch(match[0]!);
-                  })]!;
+              final mention = _mapping[_mapping.keys.lastWhere((element) {
+                final reg = RegExp(element);
+                return reg.hasMatch(match[0]!);
+              })]!;
 
               // Default markup format for mentions
               if (!mention.disableMarkup) {
@@ -50,9 +47,9 @@ class AnnotationEditingController extends TextEditingController {
   }
 
   set mapping(Map<String, Annotation> _mapping) {
-    this._mapping = _mapping;
-    print("provided mapping: $_mapping"); 
-    _pattern = "(${_mapping.keys.map((key) => RegExp.escape(key)).join('|')})";
+    this._mapping.addAll(_mapping);
+    _pattern =
+        "(${_mapping.keys.toList().reversed.map((key) => RegExp.escape(key)).join('|')})";
   }
 
   @override
@@ -67,12 +64,11 @@ class AnnotationEditingController extends TextEditingController {
         RegExp('$_pattern'),
         onMatch: (Match match) {
           if (_mapping.isNotEmpty) {
-            final mention = _mapping[match[0]!] ??
-                _mapping[_mapping.keys.firstWhere((element) {
-                  final reg = RegExp(element);
-                  return reg.hasMatch(match[0]!);
-                })]!;
-
+            final mention = _mapping[_mapping.keys.lastWhere((element) {
+              final reg = RegExp(element);
+              return reg.hasMatch(match[0]!);
+            })]!;
+            print("versionL:2");
             children.add(
               TextSpan(
                 text: match[0],

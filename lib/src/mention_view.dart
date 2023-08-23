@@ -250,12 +250,12 @@ class FlutterMentionsState extends State<FlutterMentions> {
   ValueNotifier<bool> showSuggestions = ValueNotifier(false);
   LengthMap? _selectedMention;
   String _pattern = '';
+  final data = <String, Annotation>{};
 
   List<Map<String, dynamic>> mentionList = [];
 
   Map<String, Annotation> mapToAnotation(
       List<Map<String, dynamic>> mentionList) {
-    final data = <String, Annotation>{};
     // if (widget.mention.matchAll) {
     data['${widget.mention.trigger}([A-Za-z0-9])*'] = Annotation(
       style: widget.mention.style,
@@ -422,24 +422,41 @@ class FlutterMentionsState extends State<FlutterMentions> {
         portal: ValueListenableBuilder(
           valueListenable: showSuggestions,
           builder: (BuildContext context, bool show, Widget? child) {
-            return show && !widget.hideSuggestionList
-                ? OptionList(
-                    suggestionListHeight: widget.suggestionListHeight,
-                    suggestionBuilder: list.suggestionBuilder,
-                    suggestionListDecoration: widget.suggestionListDecoration,
-                    data: mentionList.where((element) {
-                      final ele = element['display'].toLowerCase();
-                      final str = _selectedMention!.str
-                          .toLowerCase()
-                          .replaceAll(RegExp(_pattern), '');
+            List<Map<String, dynamic>>? showList;
+            if (show && !widget.hideSuggestionList) {
+              showList = mentionList.where((element) {
+                final ele = element['display'].toLowerCase();
+                final str = _selectedMention!.str
+                    .toLowerCase()
+                    .replaceAll(RegExp(_pattern), '');
 
-                      return ele == str ? false : ele.contains(str);
-                    }).toList(),
-                    onTap: (value) {
-                      addMention(value, list);
-                      showSuggestions.value = false;
-                    },
-                  )
+                return ele == str ? false : ele.contains(str);
+              }).toList();
+            }
+
+            return show && !widget.hideSuggestionList
+                ? mentionList.isEmpty
+                    ? Container(
+                        // height: 50,
+                        // width: MediaQuery.of(context).size.width,
+                        // decoration: BoxDecoration(color: Colors.black),
+                        // child: Center(
+                        //   child: CircularProgressIndicator(),
+                        // ),
+                        )
+                    : showList != null && showList.isEmpty
+                        ? Container()
+                        : OptionList(
+                            suggestionListHeight: widget.suggestionListHeight,
+                            suggestionBuilder: list.suggestionBuilder,
+                            suggestionListDecoration:
+                                widget.suggestionListDecoration,
+                            data: showList!,
+                            onTap: (value) {
+                              addMention(value, list);
+                              showSuggestions.value = false;
+                            },
+                          )
                 : Container();
           },
         ),
