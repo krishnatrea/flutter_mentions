@@ -14,6 +14,7 @@ class AnnotationEditingController extends TextEditingController {
 
   /// Can be used to get the markup from the controller directly.
   String get markupText {
+    print("Mapping: $_mapping");
     final someVal = _mapping.isEmpty
         ? text
         : text.splitMapJoin(
@@ -31,7 +32,7 @@ class AnnotationEditingController extends TextEditingController {
                 return mention.markupBuilder != null
                     ? mention.markupBuilder!(
                         mention.trigger, mention.id!, mention.display!)
-                    : '${mention.trigger}${mention.display}_${mention.id}_${mention.theme}';
+                    : '<${mention.trigger}${mention.display}_${mention.id}_${mention.theme}>';
               } else {
                 return match[0]!;
               }
@@ -50,7 +51,7 @@ class AnnotationEditingController extends TextEditingController {
 
   set mapping(Map<String, Annotation> _mapping) {
     this._mapping = _mapping;
-
+    print("provided mapping: $_mapping"); 
     _pattern = "(${_mapping.keys.map((key) => RegExp.escape(key)).join('|')})";
   }
 

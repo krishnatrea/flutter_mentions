@@ -19,7 +19,7 @@ class Mention {
     required this.trigger,
     required this.data,
     this.style,
-    this.matchAll = false,
+    this.matchAll = true,
     this.suggestionBuilder,
     this.disableMarkup = false,
     this.markupBuilder,
@@ -33,7 +33,7 @@ class Mention {
   /// You need to provide two properties `id` & `display` both are [String]
   /// You can also have any custom properties as you like to build custom suggestion
   /// widget.
-  final ValueNotifier<List<Map<String, dynamic>>> data;
+  final StreamController<List<Map<String, dynamic>>> data;
 
   /// Style for the mention item in Input.
   final TextStyle? style;
@@ -53,15 +53,14 @@ class Mention {
 }
 
 class Annotation {
-  Annotation({
-    required this.trigger,
-    this.style,
-    this.id,
-    this.display,
-    this.disableMarkup = false,
-    this.markupBuilder,
-    required this.theme
-  });
+  Annotation(
+      {required this.trigger,
+      this.style,
+      this.id,
+      this.display,
+      this.disableMarkup = false,
+      this.markupBuilder,
+      required this.theme});
 
   TextStyle? style;
   String? theme;

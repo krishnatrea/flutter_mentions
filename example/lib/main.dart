@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_mentions/flutter_mentions.dart';
 
@@ -123,50 +125,48 @@ class _MyHomePageState extends State<MyHomePage> {
                   },
                 ];
               },
-              mentions: [
-                Mention(
-                    trigger: '@',
-                    style: TextStyle(
-                      color: Colors.amber,
-                    ),
-                    data: data,
-                    matchAll: false,
-                    suggestionBuilder: (data) {
-                      return Container(
-                        padding: EdgeInsets.all(10.0),
-                        child: Row(
-                          children: <Widget>[
-                            CircleAvatar(
-                              backgroundImage: NetworkImage(
-                                data['photo'],
-                              ),
+              mention: Mention(
+                  trigger: '@',
+                  style: TextStyle(
+                    color: Colors.amber,
+                  ),
+                  data: StreamController(),
+                  matchAll: false,
+                  suggestionBuilder: (data) {
+                    return Container(
+                      padding: EdgeInsets.all(10.0),
+                      child: Row(
+                        children: <Widget>[
+                          CircleAvatar(
+                            backgroundImage: NetworkImage(
+                              data['photo'],
                             ),
-                            SizedBox(
-                              width: 20.0,
-                            ),
-                            Column(
-                              children: <Widget>[
-                                Text(data['full_name']),
-                                Text('@${data['display']}'),
-                              ],
-                            )
-                          ],
-                        ),
-                      );
-                    }),
-                // Mention(
-                //   trigger: '#',
-                //   disableMarkup: true,
-                //   style: TextStyle(
-                //     color: Colors.blue,
-                //   ),
-                //   data: [
-                //     {'id': 'reactjs', 'display': 'reactjs'},
-                //     {'id': 'javascript', 'display': 'javascript'},
-                //   ],
-                //   matchAll: true,
-                // )
-              ],
+                          ),
+                          SizedBox(
+                            width: 20.0,
+                          ),
+                          Column(
+                            children: <Widget>[
+                              Text(data['full_name']),
+                              Text('@${data['display']}'),
+                            ],
+                          )
+                        ],
+                      ),
+                    );
+                  }),
+              // Mention(
+              //   trigger: '#',
+              //   disableMarkup: true,
+              //   style: TextStyle(
+              //     color: Colors.blue,
+              //   ),
+              //   data: [
+              //     {'id': 'reactjs', 'display': 'reactjs'},
+              //     {'id': 'javascript', 'display': 'javascript'},
+              //   ],
+              //   matchAll: true,
+              //
             ),
           ),
         ],

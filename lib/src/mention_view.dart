@@ -2,7 +2,7 @@ part of flutter_mentions;
 
 class FlutterMentions extends StatefulWidget {
   FlutterMentions({
-    required this.mentions,
+    required this.mention,
     Key? key,
     this.defaultText,
     this.suggestionPosition = SuggestionPosition.Bottom,
@@ -61,7 +61,7 @@ class FlutterMentions extends StatefulWidget {
   final Function(bool)? onSuggestionVisibleChanged;
 
   /// List of Mention that the user is allowed to triggered
-  final List<Mention> mentions;
+  final Mention mention;
 
   /// Leading widgets to show before teh Input box, helps preseve the size
   /// size for the Portal widget size.
@@ -251,47 +251,46 @@ class FlutterMentionsState extends State<FlutterMentions> {
   LengthMap? _selectedMention;
   String _pattern = '';
 
-  Map<String, Annotation> mapToAnotation() {
+  List<Map<String, dynamic>> mentionList = [];
+
+  Map<String, Annotation> mapToAnotation(
+      List<Map<String, dynamic>> mentionList) {
     final data = <String, Annotation>{};
+    // if (widget.mention.matchAll) {
+    data['${widget.mention.trigger}([A-Za-z0-9])*'] = Annotation(
+      style: widget.mention.style,
+      theme: null,
+      id: null,
+      display: null,
+      trigger: widget.mention.trigger,
+      disableMarkup: widget.mention.disableMarkup,
+      markupBuilder: widget.mention.markupBuilder,
+    );
 
-    // Loop over all the mention items and generate a suggestions matching list
-    widget.mentions.forEach((element) {
-      // if matchAll is set to true add a general regex patteren to match with
-      if (element.matchAll) {
-        data['${element.trigger}([A-Za-z0-9])*'] = Annotation(
-          style: element.style,
-           theme: null,
-          id: null,
-          display: null,
-          trigger: element.trigger,
-          disableMarkup: element.disableMarkup,
-          markupBuilder: element.markupBuilder,
-        );
-      }
-
-      element.data.value.forEach(
-        (e) => data["${element.trigger}${e['display']}"] = e['style'] != null
-            ? Annotation(
-                style: e['style'],
-                theme: e['theme'],
-                id: e['id'],
-                display: e['display'],
-                trigger: element.trigger,
-                disableMarkup: element.disableMarkup,
-                markupBuilder: element.markupBuilder,
-              )
-            : Annotation(
-                style: element.style,
-                 theme: e['theme'],
-                id: e['id'],
-                display: e['display'],
-                trigger: element.trigger,
-                disableMarkup: element.disableMarkup,
-                markupBuilder: element.markupBuilder,
-              ),
-      );
-    });
-
+    mentionList.forEach(
+      (e) =>
+          data["${widget.mention.trigger}${e['display']}"] = e['style'] != null
+              ? Annotation(
+                  style: e['style'],
+                  theme: e['theme'],
+                  id: e['id'],
+                  display: e['display'],
+                  trigger: widget.mention.trigger,
+                  disableMarkup: widget.mention.disableMarkup,
+                  markupBuilder: widget.mention.markupBuilder,
+                )
+              : Annotation(
+                  style: widget.mention.style,
+                  theme: e['theme'],
+                  id: e['id'],
+                  display: e['display'],
+                  trigger: widget.mention.trigger,
+                  disableMarkup: widget.mention.disableMarkup,
+                  markupBuilder: widget.mention.markupBuilder,
+                ),
+    );
+    // }
+    print("Mapping 2 $data");
     return data;
   }
 
@@ -302,8 +301,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
       _selectedMention = null;
     });
 
-    final _list = widget.mentions
-        .firstWhere((element) => selectedMention.str.contains(element.trigger));
+    final _list = widget.mention;
 
     // find the text by range and replace with the new value.
     controller!.text = controller!.value.text.replaceRange(
@@ -339,7 +337,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
       });
 
       final val = lengthMap.indexWhere((element) {
-        _pattern = widget.mentions.map((e) => e.trigger).join('|');
+        _pattern = widget.mention.trigger;
 
         return element.end == cursorPos &&
             element.str.toLowerCase().contains(RegExp(_pattern));
@@ -377,19 +375,21 @@ class FlutterMentionsState extends State<FlutterMentions> {
 
   @override
   void initState() {
-    final data = mapToAnotation();
-
+    final data = mapToAnotation([]);
     controller = AnnotationEditingController(data);
-
     if (widget.defaultText != null) {
       controller!.text = widget.defaultText!;
     }
-
+    controller!.addListener(inputListeners);
+    widget.mention.data.stream.listen((event) {
+      mentionList = event;
+      controller!.mapping = mapToAnotation(mentionList);
+      if (mounted) {
+        setState(() {});
+      }
+    });
     // setup a listener to figure out which suggestions to show based on the trigger
     controller!.addListener(suggestionListerner);
-
-    controller!.addListener(inputListeners);
-
     super.initState();
   }
 
@@ -397,24 +397,19 @@ class FlutterMentionsState extends State<FlutterMentions> {
   void dispose() {
     controller!.removeListener(suggestionListerner);
     controller!.removeListener(inputListeners);
-
     super.dispose();
   }
 
   @override
   void didUpdateWidget(widget) {
     super.didUpdateWidget(widget);
-
-    controller!.mapping = mapToAnotation();
+    controller!.mapping = mapToAnotation([]);
   }
 
   @override
   Widget build(BuildContext context) {
     // Filter the list based on the selection
-    final list = _selectedMention != null
-        ? widget.mentions.firstWhere(
-            (element) => _selectedMention!.str.contains(element.trigger))
-        : widget.mentions[0];
+    final list = widget.mention;
 
     return Container(
       child: PortalEntry(
@@ -432,7 +427,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
                     suggestionListHeight: widget.suggestionListHeight,
                     suggestionBuilder: list.suggestionBuilder,
                     suggestionListDecoration: widget.suggestionListDecoration,
-                    data: list.data.value.where((element) {
+                    data: mentionList.where((element) {
                       final ele = element['display'].toLowerCase();
                       final str = _selectedMention!.str
                           .toLowerCase()
