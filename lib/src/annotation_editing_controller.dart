@@ -68,7 +68,6 @@ class AnnotationEditingController extends TextEditingController {
               final reg = RegExp(element);
               return reg.hasMatch(match[0]!);
             })]!;
-            print("versionL:2");
             children.add(
               TextSpan(
                 text: match[0],
