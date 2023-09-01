@@ -4,7 +4,7 @@ class FlutterMentions extends StatefulWidget {
   FlutterMentions({
     required this.mention,
     Key? key,
-    this.defaultText,
+    required this.defaultText,
     this.suggestionPosition = SuggestionPosition.Bottom,
     this.suggestionListHeight = 300.0,
     this.onMarkupChanged,
@@ -55,7 +55,7 @@ class FlutterMentions extends StatefulWidget {
   final bool hideSuggestionList;
 
   /// default text for the Mention Input.
-  final String? defaultText;
+  final StreamController<String?> defaultText;
 
   /// Triggers when the suggestion list visibility changed.
   final Function(bool)? onSuggestionVisibleChanged;
@@ -254,6 +254,35 @@ class FlutterMentionsState extends State<FlutterMentions> {
 
   List<Map<String, dynamic>> mentionList = [];
 
+  void setDefaultText(String? text) {
+    print("editMessage.message?.content 4 called setDefault");
+    var mentionList = <Map<String, dynamic>>[];
+    if (text != null || text!.isNotEmpty) {
+      final exp = RegExp(
+        r'<@([a-z0-9_.-]+)_([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})_([A-Z]+)>',
+      );
+      controller?.text = text.splitMapJoin(
+        exp,
+        onMatch: (match) {
+          var username = match.group(1)!;
+          var id = match.group(2)!;
+          var theme = match.group(3)!.toLowerCase();
+          mentionList.add({
+            'id': id,
+            'username': username,
+            'theme': theme.toUpperCase(),
+            'display': username,
+          });
+          return '@$username';
+        },
+        onNonMatch: (notMatch) => notMatch,
+      );
+    } else {
+      controller?.text = '';
+    }
+    controller?.mapping = mapToAnotation(mentionList);
+  }
+
   Map<String, Annotation> mapToAnotation(
       List<Map<String, dynamic>> mentionList) {
     // if (widget.mention.matchAll) {
@@ -377,10 +406,16 @@ class FlutterMentionsState extends State<FlutterMentions> {
   void initState() {
     final data = mapToAnotation([]);
     controller = AnnotationEditingController(data);
-    if (widget.defaultText != null) {
-      controller!.text = widget.defaultText!;
-    }
-    controller!.addListener(inputListeners);
+    widget.defaultText.stream.listen(
+      (event) {
+        print("editMessage.message?.content 4 called setDefault $event");
+        setDefaultText(event);
+        setState(() {});
+      },
+      onDone: () => print("Stream done"),
+      onError: (error) => print("Stream done $error"),
+      cancelOnError: false,
+    );
     widget.mention.data.stream.listen((event) {
       mentionList = event;
       controller!.mapping = mapToAnotation(mentionList);
@@ -390,6 +425,8 @@ class FlutterMentionsState extends State<FlutterMentions> {
     });
     // setup a listener to figure out which suggestions to show based on the trigger
     controller!.addListener(suggestionListerner);
+    controller!.addListener(inputListeners);
+
     super.initState();
   }
 
@@ -429,7 +466,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
                 final str = _selectedMention!.str
                     .toLowerCase()
                     .replaceAll(RegExp(_pattern), '');
-                    
+
                 return str.isEmpty
                     ? true
                     : ele == str

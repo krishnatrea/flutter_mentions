@@ -86,6 +86,7 @@ class _MyHomePageState extends State<MyHomePage> {
           Container(
             child: FlutterMentions(
               key: key,
+              defaultText: StreamController(),
               suggestionPosition: SuggestionPosition.Top,
               maxLines: 5,
               minLines: 1,
